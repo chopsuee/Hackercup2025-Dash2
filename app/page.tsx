@@ -11,6 +11,7 @@ import TerminalDetails from '@/components/TerminalDetails';
 import LoginDialog from '@/components/LoginDialog';
 import RouteInfo from '@/components/RouteInfo';
 import { StatusDashboard, SmartSuggestions, QuickActions } from '@/components/SimpleComponents';
+import RouteInput from '@/components/RouteInput';
 import { calculateDistance, estimateTravelTime, findNearestAlternatives } from '@/lib/routing';
 // Simple SVG icons to replace lucide-react
 const MapPin = () => <span>📍</span>;
@@ -30,16 +31,20 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<[number, number]>([14.5995, 120.9842]);
   const [showRoute, setShowRoute] = useState<Terminal | null>(null);
+  const [currentRoute, setCurrentRoute] = useState({ from: 'De La Salle-Taft', to: 'Indang, Cavite' });
 
-  // Get user location
+  // Get user location (simulated for De La Salle-Taft)
   useEffect(() => {
+    // Simulate De La Salle-Taft location
+    setUserLocation([14.5649, 120.9934]); // De La Salle-Taft coordinates
+    
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation([position.coords.latitude, position.coords.longitude]);
         },
         () => {
-          // Use Manila as default if location access denied
+          // Keep De La Salle-Taft as default
         }
       );
     }
@@ -54,6 +59,17 @@ export default function App() {
       
       setTerminals(prevTerminals =>
         prevTerminals.map(terminal => {
+          // Force PITX to be overcrowded for demo
+          if (terminal.id === 'pitx') {
+            return {
+              ...terminal,
+              currentQueue: 650,
+              estimatedWait: 45,
+              queueStatus: 'heavy' as const,
+              lastUpdated: new Date()
+            };
+          }
+          
           let multiplier = 1;
           
           if (isWeekend) {
@@ -125,8 +141,14 @@ export default function App() {
 
   const handleEmergencyRide = () => {
     if (typeof window !== 'undefined') {
-      window.open('grab://open?screen=booking', '_blank');
+      const pickup = encodeURIComponent(currentRoute.from);
+      const destination = encodeURIComponent(currentRoute.to);
+      window.open(`grab://open?pickup=${pickup}&destination=${destination}`, '_blank');
     }
+  };
+
+  const handleRouteSet = (from: string, to: string) => {
+    setCurrentRoute({ from, to });
   };
 
   const handleQueueUpdate = (status: 'light' | 'moderate' | 'heavy') => {
@@ -181,7 +203,7 @@ export default function App() {
               <div>
                 <h1 className="text-lg font-bold text-gray-900">PILAPINAS</h1>
                 <p className="text-xs text-gray-500">
-                  {viewMode === 'dashboard' ? 'Status Overview' : 
+                  {viewMode === 'dashboard' ? `${currentRoute.from} → ${currentRoute.to}` : 
                    viewMode === 'map' ? 'Map View' : 'Terminal List'}
                 </p>
               </div>
@@ -230,20 +252,34 @@ export default function App() {
       <div className="h-[calc(100vh-80px)]">
         {viewMode === 'dashboard' ? (
           <div className="p-4 space-y-4 overflow-y-auto">
+            <RouteInput
+              onRouteSet={handleRouteSet}
+              currentRoute={currentRoute}
+            />
             <QuickActions
               onFindNearest={handleFindNearest}
               onShowAlternatives={handleShowAlternatives}
               onEmergencyRide={handleEmergencyRide}
             />
             <StatusDashboard
-              terminals={terminals.slice(0, 6).map(t => ({ ...t, distance: 1, travelTime: 10 }))}
+              terminals={terminals.slice(0, 6).map((t, index) => ({ 
+                ...t, 
+                distance: t.id === 'pitx' ? 2.1 : (index + 1) * 1.5, 
+                travelTime: t.id === 'pitx' ? 8 : (index + 1) * 5
+              }))}
               onSelectTerminal={handleTerminalSelect}
               onShowRoute={handleShowRoute}
+              userLocation={userLocation}
             />
             <SmartSuggestions
               userLocation={userLocation}
-              nearbyTerminals={terminals.slice(0, 3).map(t => ({ ...t, distance: 1, travelTime: 10 }))}
+              nearbyTerminals={terminals.slice(0, 3).map((t, index) => ({ 
+                ...t, 
+                distance: (index + 1) * 1.5, 
+                travelTime: (index + 1) * 5 
+              }))}
               onSelectTerminal={handleTerminalSelect}
+              currentRoute={currentRoute}
             />
           </div>
         ) : viewMode === 'map' ? (
