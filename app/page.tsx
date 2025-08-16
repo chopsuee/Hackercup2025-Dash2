@@ -159,7 +159,7 @@ export default function App() {
     setDestination(dest);
     setCurrentRoute({ from: 'PITX', to: dest });
     setShowWelcome(false);
-    setViewMode('map');
+    setViewMode('dashboard');
   };
 
   // Mock route data for PITX to Vito Cruz

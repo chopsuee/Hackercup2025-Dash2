@@ -10,11 +10,11 @@ export default function WelcomeScreen({ onDestinationSet }: WelcomeScreenProps) 
   const [destination, setDestination] = useState('');
 
   const popularDestinations = [
-    'Vito Cruz',
-    'Makati CBD',
+    'Indang, Cavite',
+    'Bacoor city, Cavite',
     'BGC',
     'Alabang',
-    'Quezon City'
+  
   ];
 
   const handleSubmit = () => {

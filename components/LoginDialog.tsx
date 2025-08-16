@@ -45,7 +45,7 @@ export default function LoginDialog({ isOpen, onClose, onLogin }: LoginDialogPro
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserIcon className="w-5 h-5" />
+            <UserIcon />
             Quick Access
           </DialogTitle>
         </DialogHeader>

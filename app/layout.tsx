@@ -18,6 +18,10 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'PILAPINAS'
+  },
+  other: {
+    'msapplication-TileColor': '#3b82f6',
+    'msapplication-tap-highlight': 'no'
   }
 }
 

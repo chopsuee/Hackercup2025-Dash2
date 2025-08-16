@@ -23,8 +23,9 @@ export default function RouteLayer({ start, end, color = '#3b82f6', onRouteCalcu
         if (mounted) {
           onRouteCalculated?.(coordinates);
           // Fit map to show the route
-          const bounds = coordinates.reduce((bounds, coord) => bounds.extend(coord), 
-            L.latLngBounds([start, end]));
+          const bounds = coordinates.reduce((bounds, coord) => {
+            return bounds.extend(coord);
+          }, map.getBounds());
           map.fitBounds(bounds, { padding: [20, 20] });
         }
       } catch (error) {
