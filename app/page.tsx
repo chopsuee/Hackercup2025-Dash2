@@ -12,6 +12,8 @@ import LoginDialog from '@/components/LoginDialog';
 import RouteInfo from '@/components/RouteInfo';
 import { StatusDashboard, SmartSuggestions, QuickActions } from '@/components/SimpleComponents';
 import RouteInput from '@/components/RouteInput';
+import WelcomeScreen from '@/components/WelcomeScreen';
+import RouteMap from '@/components/RouteMap';
 import { calculateDistance, estimateTravelTime, findNearestAlternatives } from '@/lib/routing';
 // Simple SVG icons to replace lucide-react
 const MapPin = () => <span>📍</span>;
@@ -32,6 +34,8 @@ export default function App() {
   const [userLocation, setUserLocation] = useState<[number, number]>([14.5995, 120.9842]);
   const [showRoute, setShowRoute] = useState<Terminal | null>(null);
   const [currentRoute, setCurrentRoute] = useState({ from: 'De La Salle-Taft', to: 'Indang, Cavite' });
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [destination, setDestination] = useState('');
 
   // Get user location (simulated for De La Salle-Taft)
   useEffect(() => {
@@ -64,7 +68,7 @@ export default function App() {
             return {
               ...terminal,
               currentQueue: 650,
-              estimatedWait: 45,
+              estimatedWait: 90,
               queueStatus: 'heavy' as const,
               lastUpdated: new Date()
             };
@@ -151,6 +155,34 @@ export default function App() {
     setCurrentRoute({ from, to });
   };
 
+  const handleDestinationSet = (dest: string) => {
+    setDestination(dest);
+    setCurrentRoute({ from: 'PITX', to: dest });
+    setShowWelcome(false);
+    setViewMode('map');
+  };
+
+  // Mock route data for PITX to Vito Cruz
+  const primaryRoute: [number, number][] = [
+    [14.4796, 120.9962], // PITX
+    [14.5649, 120.9934]  // Vito Cruz
+  ];
+
+  const alternativeRoutes = [
+    {
+      name: 'LRT-1 Route',
+      coordinates: [[14.4796, 120.9962], [14.5085, 120.9937], [14.5649, 120.9934]] as [number, number][],
+      color: '#10b981',
+      travelTime: '45 min'
+    },
+    {
+      name: 'Bus Route',
+      coordinates: [[14.4796, 120.9962], [14.5378, 121.0014], [14.5649, 120.9934]] as [number, number][],
+      color: '#f59e0b',
+      travelTime: '1 hr 15 min'
+    }
+  ];
+
   const handleQueueUpdate = (status: 'light' | 'moderate' | 'heavy') => {
     if (!currentUser) {
       setShowLoginDialog(true);
@@ -189,6 +221,10 @@ export default function App() {
     moderate: terminals.filter(t => t.queueStatus === 'moderate').length,
     heavy: terminals.filter(t => t.queueStatus === 'heavy').length
   };
+
+  if (showWelcome) {
+    return <WelcomeScreen onDestinationSet={handleDestinationSet} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -284,8 +320,12 @@ export default function App() {
           </div>
         ) : viewMode === 'map' ? (
           <div className="relative h-full z-0">
-            <Map
+            <RouteMap
+              origin={currentRoute.from}
+              destination={currentRoute.to}
               terminals={filteredTerminals}
+              primaryRoute={primaryRoute}
+              alternativeRoutes={alternativeRoutes}
               onTerminalSelect={handleTerminalSelect}
             />
             

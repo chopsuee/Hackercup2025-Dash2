@@ -28,11 +28,10 @@ export default function TerminalCard({ terminal, onClick }: TerminalCardProps) {
           <div className="text-right">
             <div className="flex items-center gap-1 text-sm font-bold">
               <Clock />
-              {formatTime(terminal.estimatedWait)}
+              {typeof terminal.estimatedWait === 'string' ? terminal.estimatedWait : formatTime(terminal.estimatedWait)}
             </div>
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Users />
-              {terminal.currentQueue}/{terminal.capacity}
+            <div className="text-xs text-gray-600">
+              {terminal.totalTravelTime}
             </div>
           </div>
         </div>

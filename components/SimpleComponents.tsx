@@ -40,10 +40,8 @@ export const StatusDashboard = ({ terminals, onSelectTerminal, userLocation }: a
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs font-medium">{terminal.estimatedWait}m wait</div>
-              <div className="text-xs text-gray-500">
-                {terminal.routes.includes('Cavite') || terminal.routes.includes('CALABARZON') ? '✓ To Cavite' : ''}
-              </div>
+              <div className="text-xs font-medium">Queue: {typeof terminal.estimatedWait === 'string' ? terminal.estimatedWait : `${terminal.estimatedWait}m`}</div>
+              <div className="text-xs font-bold text-blue-600">{terminal.totalTravelTime}</div>
             </div>
           </div>
         ))}
@@ -76,7 +74,8 @@ export const SmartSuggestions = ({ nearbyTerminals, onSelectTerminal, currentRou
                 <div className="text-xs text-gray-600">{terminal.distance.toFixed(1)}km • {terminal.travelTime}min away</div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-medium text-green-600">{terminal.estimatedWait}m wait</div>
+                <div className="text-xs font-medium text-green-600">Queue: {typeof terminal.estimatedWait === 'string' ? terminal.estimatedWait : `${terminal.estimatedWait}m`}</div>
+              <div className="text-xs font-bold">{terminal.totalTravelTime}</div>
                 <button className="text-xs bg-blue-500 text-white px-2 py-1 rounded mt-1">Get Directions</button>
               </div>
             </div>

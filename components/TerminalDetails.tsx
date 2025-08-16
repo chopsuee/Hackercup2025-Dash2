@@ -61,15 +61,15 @@ export default function TerminalDetails({
             <div className="flex items-center gap-2">
               <Clock />
               <div>
-                <div className="text-sm font-semibold">{formatTime(terminal.estimatedWait)}</div>
-                <div className="text-xs text-gray-500">Est. wait</div>
+                <div className="text-sm font-semibold">{typeof terminal.estimatedWait === 'string' ? terminal.estimatedWait : formatTime(terminal.estimatedWait)}</div>
+                <div className="text-xs text-gray-500">Queue time</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Users />
               <div>
-                <div className="text-sm font-semibold">{terminal.currentQueue}/{terminal.capacity}</div>
-                <div className="text-xs text-gray-500">Queue</div>
+                <div className="text-sm font-semibold">{terminal.totalTravelTime}</div>
+                <div className="text-xs text-gray-500">Total time</div>
               </div>
             </div>
           </div>

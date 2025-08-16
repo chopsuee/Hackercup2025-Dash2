@@ -1,6 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Navigation, X, Clock, MapPin } from 'lucide-react';
+const Navigation = () => <span>🧭</span>;
+const X = () => <span>✕</span>;
+const Clock = () => <span>⏰</span>;
+const MapPin = () => <span>📍</span>;
 import { Terminal } from '@/types';
 import { formatTime } from '@/lib/utils';
 
@@ -18,23 +21,23 @@ export default function RouteInfo({ destination, distance, travelTime, onClose }
         <CardContent className="p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Navigation className="w-4 h-4 text-blue-500" />
+              <Navigation />
               <div>
                 <div className="font-medium text-sm">{destination.name}</div>
                 <div className="flex items-center gap-3 text-xs text-gray-600">
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
+                    <MapPin />
                     {distance.toFixed(1)}km
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                    <Clock />
                     {formatTime(travelTime)}
                   </div>
                 </div>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
+              <X />
             </Button>
           </div>
         </CardContent>

@@ -1,20 +1,35 @@
-'use client';
-
-import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Terminal } from '@/types';
 
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
 
-interface MapProps {
+interface RouteMapProps {
+  origin: string;
+  destination: string;
   terminals: Terminal[];
+  primaryRoute: [number, number][];
+  alternativeRoutes: Array<{
+    name: string;
+    coordinates: [number, number][];
+    color: string;
+    travelTime: string;
+  }>;
   onTerminalSelect: (terminal: Terminal) => void;
 }
 
-export default function Map({ terminals, onTerminalSelect }: MapProps) {
+export default function RouteMap({ 
+  origin, 
+  destination, 
+  terminals, 
+  primaryRoute, 
+  alternativeRoutes,
+  onTerminalSelect 
+}: RouteMapProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const L = require('leaflet');
@@ -28,40 +43,81 @@ export default function Map({ terminals, onTerminalSelect }: MapProps) {
   }, []);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
       <MapContainer
         center={[14.5500, 121.0000]}
-        zoom={11}
+        zoom={13}
         className="h-full w-full"
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        
+        {/* Primary Route */}
+        <Polyline
+          positions={primaryRoute}
+          color="#3b82f6"
+          weight={6}
+          opacity={0.8}
+          smoothFactor={1}
+        />
+        
+        {/* Alternative Routes */}
+        {alternativeRoutes.map((route, index) => (
+          <Polyline
+            key={index}
+            positions={route.coordinates}
+            color={route.color}
+            weight={4}
+            opacity={0.6}
+            dashArray="10, 10"
+            smoothFactor={1}
+          />
+        ))}
+        
+        {/* Terminal Markers */}
         {terminals.map((terminal) => (
           <Marker key={terminal.id} position={terminal.coordinates}>
             <Popup>
-              <div className="p-2">
+              <div className="p-2 min-w-[200px]">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-3 h-3 rounded-full ${
+                  <div className={`w-4 h-4 rounded-full ${
                     terminal.queueStatus === 'light' ? 'bg-green-500' :
                     terminal.queueStatus === 'moderate' ? 'bg-yellow-500' : 'bg-red-500'
                   }`} />
                   <h3 className="font-semibold text-sm">{terminal.name}</h3>
                 </div>
-                <p className="text-xs text-gray-600 mb-2">{terminal.city}</p>
-                <div className="text-xs mb-2">
-                  Queue: {typeof terminal.estimatedWait === 'string' ? terminal.estimatedWait : `${terminal.estimatedWait}m`}
+                <div className="space-y-1 text-xs">
+                  <div>Queue: {typeof terminal.estimatedWait === 'string' ? terminal.estimatedWait : `${terminal.estimatedWait}m`}</div>
+                  <div className="font-medium">{terminal.totalTravelTime}</div>
+                  <div className="text-gray-600">{terminal.routeDetails}</div>
                 </div>
-                <div className="text-xs mb-2 font-medium">Total: {terminal.totalTravelTime}</div>
                 <button
                   onClick={() => onTerminalSelect(terminal)}
-                  className="w-full bg-blue-500 text-white text-xs py-1 px-2 rounded"
+                  className="w-full bg-blue-500 text-white text-xs py-1 px-2 rounded mt-2"
                 >
-                  Details
+                  Select Route
                 </button>
               </div>
             </Popup>
           </Marker>
         ))}
       </MapContainer>
+      
+      {/* Route Legend */}
+      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 z-50">
+        <h4 className="font-semibold text-sm mb-2">Routes</h4>
+        <div className="space-y-1 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-blue-500"></div>
+            <span>Primary Route</span>
+          </div>
+          {alternativeRoutes.map((route, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <div className={`w-4 h-1`} style={{ backgroundColor: route.color }}></div>
+              <span>{route.name} ({route.travelTime})</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

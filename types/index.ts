@@ -8,7 +8,9 @@ export interface Terminal {
   province: string;
   routes: string[];
   queueStatus: 'light' | 'moderate' | 'heavy';
-  estimatedWait: number;
+  estimatedWait: number | string;
+  totalTravelTime?: string;
+  routeDetails?: string;
   lastUpdated: Date;
   capacity: number;
   currentQueue: number;
